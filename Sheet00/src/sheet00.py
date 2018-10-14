@@ -32,8 +32,6 @@ if __name__ == '__main__':
     # 2d: one-line statement to perfom the operation above
     img_copy_d = (img - 0.5 * intensity_img[:, :, np.newaxis]).clip(min=0).astype(
         np.uint8)  # clip sets all negative values to zero
-    print(img_copy_d[0, 0])
-    print(img_copy_c.dtype)
     cv.imshow('2d)', img_copy_d)
     cv.waitKey(0)
     
