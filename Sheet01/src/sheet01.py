@@ -24,9 +24,7 @@ def equalize_hist(img):
     hist[numbers] = counts
 
     cum_hist = np.cumsum(hist)
-    cum_hist = cum_hist/cum_hist[-1]
-
-    print(cum_hist)
+    cum_hist = cum_hist/cum_hist[-1]    
 
     img = np.floor(cum_hist[img]*255)
 
@@ -149,8 +147,7 @@ if __name__ == '__main__':
 
 
 
-    print('Maximum error is:', np.unique((own_equalization-cv_equalization)))
-
+    np.max(np.abs(own_equalization-cv_equalization))
     cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -160,7 +157,7 @@ if __name__ == '__main__':
     print('Task 4:')
     sigma = 2*np.sqrt(2)
     kernel_size = int(2*np.ceil(3*sigma)+1)#by rule of thumb for ~99.7%
-    print(kernel_size)
+    
     cv.imshow('Opencv Gaussian Blur', cv.GaussianBlur(img,(kernel_size,kernel_size),sigma))
     cv.imshow('Own Filter with filter2d()', cv.filter2D(img,-1,getGaussianKernel(sigma)))
     kernel_1d = getGaussianKernel1d(sigma)
@@ -168,21 +165,86 @@ if __name__ == '__main__':
     cv.waitKey(0)
     cv.destroyAllWindows()
 
+
 #    =========================================================================
-#    ==================== Task 6 =================================
+#    ==================== Task 5 =================================
 #    =========================================================================
-    print('Task 6:');
+    print('Task 5:');
+    cv.imshow("Original Image", img)
+    
+    sigma = 2
+    kernel_size = int(2*np.ceil(3*sigma)+1)
+    img_2gauss = cv.GaussianBlur(cv.GaussianBlur(img, (kernel_size,kernel_size),sigma), (kernel_size,kernel_size),sigma)
+
+    sigma = 2*np.sqrt(2)
+    kernel_size = int(2*np.ceil(3*sigma)+1)
+    img_gauss = cv.GaussianBlur(img, (kernel_size,kernel_size),sigma)
+
+    cv.imshow('Gauss twice with sigma=2', img_2gauss)
+    cv.imshow('Gauss with sigma = 2*sqrt(2)', img_gauss)
+
+    print(np.max(np.abs(img_2gauss.astype(float) - img_gauss.astype(float))))
+    print(np.sum(np.abs(img_2gauss.astype(float) - img_gauss.astype(float))))
 
 
 
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 
 #    =========================================================================
 #    ==================== Task 7 =================================
 #    =========================================================================
     print('Task 7:');
+    cv.imshow("Original Image", img)
+    noise = np.random.randint(0,20,size=img.shape)
+    noise_img = img.copy()
+    noise_img[noise <= 2] = 255
+    noise_img[(noise > 2) & (noise <= 5)] = 0
 
+    cv.imshow('Salt and Pepper', noise_img)
 
+    error_gauss, error_median, error_bilateral = 256,256,256
+    img = img.astype(float)
+    for kernel in [1,3,5,7,9]:
+        kernel = kernel *2 +1
+        sigma = (kernel/2 -1) / 3
+        
+        tmp_gauss = cv.GaussianBlur(noise_img, (kernel,kernel),sigma).astype(float)
+
+        tmp_median = cv.medianBlur(noise_img, kernel).astype(float)
+
+        tmp_bilateral = cv.bilateralFilter(noise_img,kernel,10*kernel,10*kernel).astype(float)
+        
+        tmp = np.average(np.abs(img - tmp_gauss))
+        print(np.max(np.abs(img - tmp_gauss)))
+        if tmp < error_gauss:
+            print("HIER")
+            img_gauss = tmp_gauss
+            error_gauss = tmp
+
+        tmp = np.average(np.abs(img - tmp_median))
+        if tmp < error_median:
+            print("HIER1")
+            img_median = tmp_median
+            error_median = tmp
+        
+        tmp = np.average(np.abs(img - tmp_bilateral))
+        print(tmp)
+        if tmp < error_bilateral:
+            print("HIER2")
+            img_bilateral = tmp_bilateral
+            error_bilateral = tmp
+        
+    print("Gauss: {}\nMedian: {}\nBilateral: {}".format(error_gauss, error_median, error_bilateral))
+
+    cv.imshow("Optimized Gaussian", img_gauss.astype(np.uint8))
+    cv.imshow("Optimized Median", img_median.astype(np.uint8))
+    cv.imshow("Optimized Bilateral", img_bilateral.astype(np.uint8))
+
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+    img.astype(np.uint8)
 
 
 
