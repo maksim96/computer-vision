@@ -17,7 +17,7 @@ def integral_image(A):
     return np.cumsum(np.cumsum(A,axis=0),axis=1)
 
 def equalize_hist(img):
-    hist = np.zeros(255)
+    hist = np.zeros(256)
     
     numbers,counts = np.unique(img, return_counts=True)
 
@@ -26,7 +26,26 @@ def equalize_hist(img):
     cum_hist = np.cumsum(hist)
     cum_hist = cum_hist/cum_hist[-1]
 
-    img = cum_hist[img]
+    print(cum_hist)
+
+    img = np.floor(cum_hist[img]*255)
+
+    return img
+
+def gaussian(x, sigma):
+     return 1./(np.sqrt(2.*np.pi)*sigma)*np.exp(-np.power(x/sigma, 2.)/2)
+
+#get Gaussian kernel of size (ksize,ksize). ksize is an int here
+def getGaussianKernel1d(sigma):
+    half_width = np.ceil(3*sigma)
+    half_of_kernel = np.arange(0,np.ceil(3*sigma)+1)
+    half_of_kernel = gaussian(half_of_kernel,sigma)
+    kernel_1d = np.concatenate((half_of_kernel[::-1],half_of_kernel[1:]))
+    return kernel_1d
+
+def getGaussianKernel(sigma):
+    kernel_1d = getGaussianKernel1d(sigma)
+    return np.outer(kernel_1d,kernel_1d)
 
 
 
@@ -39,7 +58,10 @@ if __name__ == '__main__':
 
     box_filter = 1/(kernel_size**2)*np.ones((kernel_size,kernel_size))
 
-    #flip box filter
+    cv.getGaussianKernel
+
+    #flip box fil
+    # ter
 
     temp = get_all_sub_matrices(img,kernel_size)*box_filter[np.newaxis,:,:]
 
@@ -117,19 +139,34 @@ if __name__ == '__main__':
 #    ==================== Task 2 =================================
 #    =========================================================================
     print('Task 2:');
+    cv.imshow('Original Image', img)
+    own_equalization = equalize_hist(img).astype(np.uint8)
+    cv.imshow('Own Equalization', equalize_hist(img).astype(np.uint8))
+    cv.imshow('Original Image 2', img)
+    cv_equalization = img.copy()
+    cv.equalizeHist(img, cv_equalization)
+    cv.imshow('CV Equalization', cv_equalization)
 
 
 
+    print('Maximum error is:', np.unique((own_equalization-cv_equalization)))
 
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 #    =========================================================================
 #    ==================== Task 4 =================================
 #    =========================================================================
-    print('Task 4:');
-
-
-
-
+    print('Task 4:')
+    sigma = 2*np.sqrt(2)
+    kernel_size = int(2*np.ceil(3*sigma)+1)#by rule of thumb for ~99.7%
+    print(kernel_size)
+    cv.imshow('Opencv Gaussian Blur', cv.GaussianBlur(img,(kernel_size,kernel_size),sigma))
+    cv.imshow('Own Filter with filter2d()', cv.filter2D(img,-1,getGaussianKernel(sigma)))
+    kernel_1d = getGaussianKernel1d(sigma)
+    cv.imshow('Own Filter with setpFilter2d()', cv.sepFilter2D(img,-1,kernel_1d,kernel_1d))
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 #    =========================================================================
 #    ==================== Task 6 =================================
