@@ -118,7 +118,6 @@ if __name__ == '__main__':
     cv.imshow('Original Image', img)
     own_equalization = equalize_hist(img).astype(np.uint8)
     cv.imshow('Own Equalization', equalize_hist(img).astype(np.uint8))
-    cv.imshow('Original Image 2', img)
     cv_equalization = img.copy()
     cv.equalizeHist(img, cv_equalization)
     cv.imshow('CV Equalization', cv_equalization)
