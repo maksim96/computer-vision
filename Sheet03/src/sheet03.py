@@ -159,6 +159,14 @@ def myKmeans(data, k):
         
         # update clusters' centers and check for convergence
         new_centers = np.array([data[closest==i].mean(axis=0) for i in range(k)])
+
+        # this is a workaround for the case that a cluster is empty
+        # might be dirty, but it should work.
+        # the event is quite the rare one. 
+        nan_rows = np.isnan(new_centers).any(axis=1)
+        if nan_rows.any():
+            new_centers[nan_rows] = centers[nan_rows]
+        
         if (new_centers == centers).all():
             convergence = True
         else:
@@ -183,7 +191,7 @@ def task_3_a():
         index, _ = myKmeans(arr_img, i)
         for k in range(i):
             img[index.reshape(img.shape) == k] = k/i * 255
-        cv.imshow("k={} clustering".format(i), img)
+        cv.imshow("Task 3(a): k={} clustering".format(i), img)
         cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -197,7 +205,7 @@ def task_3_b():
         index, _ = myKmeans(arr_img, i)
         for k in range(i):
             img[index.reshape(img.shape[:-1 ]) == k] = k/(i-1) * 255
-        cv.imshow("k={} clustering".format(i), img)
+        cv.imshow("Task 3(b): k={} clustering".format(i), img)
         cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -214,8 +222,6 @@ def task_3_c():
 
     arr_img = np.concatenate((arr_img, ind), axis=1)
 
-    # todo: add relative image location scaled to 255
-
     # normalize the data to a scale from 0 to 255
     arr_img = arr_img.astype(float)
     arr_img[:,-1] = (arr_img[:,-1]/arr_img[:,-1].argmax(0)) * 255
@@ -225,7 +231,7 @@ def task_3_c():
         index, _ = myKmeans(arr_img, i)
         for k in range(i):
             img[index.reshape(img.shape[:-1 ]) == k] = k/(i-1) * 255
-        cv.imshow("k={} clustering".format(i), img)
+        cv.imshow("Task 3(c): k={} clustering".format(i), img)
         cv.waitKey(0)
     cv.destroyAllWindows()
 
@@ -264,11 +270,7 @@ def task_4_a():
     normalized_cut_value = np.dot(np.dot(y, (D - W)), y) / (np.dot(np.dot(y, W), y))
     print('Normalized cut value:', normalized_cut_value)
 
-    '''
-    ...
-    your code ...
-    ...
-    '''
+
 
 
 ##############################################
