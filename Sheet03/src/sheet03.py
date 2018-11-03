@@ -210,7 +210,6 @@ def task_3_c():
     
     ind = np.indices(img.shape[:-1])
     ind = np.dstack((ind[0], ind[1]))
-    print(img.shape, arr_img.shape, ind.shape)
     ind = ind.reshape((int(arr_img.size/3), 2))
 
     arr_img = np.concatenate((arr_img, ind), axis=1)
